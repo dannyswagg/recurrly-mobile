@@ -21,7 +21,7 @@ const upcomingSubscriptionCard = ({
             className="text-sm font-sans-semibold text-muted-foreground"
             numberOfLines={1}
           >
-            {daysLeft < 1 ? `${daysLeft} days left` : "Last day"}
+            {daysLeft <= 1 ? "Last day" : `${daysLeft} days left`}
           </Text>
         </View>
       </View>
