@@ -1,8 +1,7 @@
 import { tabs } from "@/constants/data";
 import { colors, components } from "@/constants/theme";
-import { Image } from "expo-image";
 import { Tabs } from "expo-router";
-import { View } from "react-native";
+import { Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const tabBar = components.tabBar;
@@ -10,7 +9,7 @@ const tabBar = components.tabBar;
 const TabLayout = () => {
   const insets = useSafeAreaInsets();
 
-  const TabIcon = ({ focused, icon }: TabIconsProps) => {
+  const TabIcon = ({ focused, icon }: TabIconProps) => {
     return (
       <View className="tabs-icon">
         <View
@@ -19,7 +18,12 @@ const TabLayout = () => {
             backgroundColor: focused ? colors.accent : "transparent",
           }}
         >
-          <Image source={icon} className="tabs-glyph" resizeMode="contain" />
+          <Image
+            source={icon}
+            className="tabs-glyph"
+            style={{ width: 24, height: 24 }}
+            resizeMode="contain"
+          />
         </View>
       </View>
     );
