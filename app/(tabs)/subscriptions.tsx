@@ -11,7 +11,7 @@ const subscriptions = () => {
       edges={["top", "bottom"]}
       style={{ flex: 1, backgroundColor: "#fff9e3" }}
     >
-      <ContentView className="flex-1 p-5">
+      <ContentView className="p-5">
         <View>
           <Text>subscriptions</Text>
         </View>
