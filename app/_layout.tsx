@@ -8,7 +8,10 @@ import { useEffect } from "react";
 
 SplashScreen.preventAutoHideAsync();
 
-const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+if (!publishableKey) {
+  throw new Error("Missing environment variable: EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY");
+}
 
 function InitialLayout({ fontsLoaded }: { fontsLoaded: boolean }) {
   const { isSignedIn, isLoaded } = useAuth();

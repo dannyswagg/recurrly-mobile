@@ -327,18 +327,17 @@ export default function SignIn() {
                 ) : null}
               </View>
 
-              {/* Forgot password */}
-              <Pressable style={{ alignSelf: "flex-end" }} hitSlop={8}>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    fontFamily: "sans-semibold",
-                    color: "#ea7a53",
-                  }}
-                >
-                  Forgot password?
-                </Text>
-              </Pressable>
+              {/* Forgot password — non-interactive until reset flow is implemented */}
+              <Text
+                style={{
+                  alignSelf: "flex-end",
+                  fontSize: 13,
+                  fontFamily: "sans-semibold",
+                  color: "#ea7a53",
+                }}
+              >
+                Forgot password?
+              </Text>
 
               {/* Sign In button */}
               <Pressable

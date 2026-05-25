@@ -1,6 +1,6 @@
 import { useSignUp } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -143,6 +143,13 @@ export default function SignUp() {
 
   const emailRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) clearInterval(timerRef.current);
+    };
+  }, []);
 
   const strength = passwordStrength(password);
 
@@ -221,10 +228,13 @@ export default function SignUp() {
       setVerifyErrors({});
       let remaining = 30;
       setResendCooldown(remaining);
-      const interval = setInterval(() => {
+      timerRef.current = setInterval(() => {
         remaining -= 1;
         setResendCooldown(remaining);
-        if (remaining <= 0) clearInterval(interval);
+        if (remaining <= 0) {
+          clearInterval(timerRef.current!);
+          timerRef.current = null;
+        }
       }, 1000);
     } catch (err) {
       setVerifyErrors({ general: clerkMessage(err) });
@@ -644,7 +654,7 @@ export default function SignUp() {
                     }}
                   >
                     <Text style={{ fontSize: 13, fontFamily: "sans-medium", color: "rgba(0,0,0,0.5)" }}>
-                      Didn't receive it?
+                      {"Didn’t receive it?"}
                     </Text>
                     <Pressable
                       onPress={handleResend}
