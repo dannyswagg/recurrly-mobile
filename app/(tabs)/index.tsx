@@ -4,12 +4,12 @@ import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import {
   HOME_BALANCE,
   HOME_SUBSCRIPTIONS,
-  HOME_USER,
   UPCOMING_SUBSCRIPTIONS,
 } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
 import { formatCurrency } from "@/lib/utils";
+import { useUser } from "@clerk/clerk-expo";
 import dayjs from "dayjs";
 import { styled } from "nativewind";
 import { useState } from "react";
@@ -19,6 +19,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const ContentView = styled(View);
 
 export default function App() {
+  const { user } = useUser();
+  const displayName = user?.firstName ?? user?.fullName ?? "there";
   const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
     string | null
   >(null);
@@ -34,12 +36,12 @@ export default function App() {
               <View className="mb-2.5 flex-row items-center justify-between">
                 <View className="flex-row items-center">
                   <Image
-                    source={images.avatar}
+                    source={user?.imageUrl ? { uri: user.imageUrl } : images.avatar}
                     className="size-12 rounded-full"
                     style={{ width: 48, height: 48 }}
                   />
                   <Text className="ml-4 text-2xl font-sans-bold text-primary">
-                    {HOME_USER.name}
+                    {displayName}
                   </Text>
                 </View>
                 <Image
@@ -89,7 +91,7 @@ export default function App() {
               expanded={expandedSubscriptionId === item.id}
               onPress={() =>
                 setExpandedSubscriptionId((currentId) =>
-                  currentId === item.id ? "null" : item.id,
+                  currentId === item.id ? null : item.id,
                 )
               }
             />
