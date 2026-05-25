@@ -1,10 +1,41 @@
 import "@/global.css";
+import { tokenCache } from "@/lib/tokenCache";
+import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
 SplashScreen.preventAutoHideAsync();
+
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+if (!publishableKey) {
+  throw new Error("Missing environment variable: EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY");
+}
+
+function InitialLayout({ fontsLoaded }: { fontsLoaded: boolean }) {
+  const { isSignedIn, isLoaded } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (fontsLoaded && isLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const inAuthGroup = segments[0] === "(auth)";
+    if (isSignedIn && inAuthGroup) {
+      router.replace("/(tabs)");
+    } else if (!isSignedIn && !inAuthGroup) {
+      router.replace("/(auth)/sign-in");
+    }
+  }, [isSignedIn, isLoaded, segments]);
+
+  return <Stack screenOptions={{ headerShown: false }} />;
+}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -16,12 +47,11 @@ export default function RootLayout() {
     "sans-extrabold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
   });
 
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontsLoaded]);
-
   if (!fontsLoaded) return null;
-  return <Stack screenOptions={{ headerShown: false }} />;
+
+  return (
+    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
+      <InitialLayout fontsLoaded={fontsLoaded} />
+    </ClerkProvider>
+  );
 }
