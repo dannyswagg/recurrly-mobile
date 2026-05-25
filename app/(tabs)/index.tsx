@@ -1,19 +1,20 @@
+import CreateSubscriptionModal from "@/components/CreateSubscriptionModal";
 import ListHeading from "@/components/ListHeading";
 import SubscriptionCard from "@/components/SubscriptionCard";
 import UpcomingSubscriptionCard from "@/components/UpcomingSubscriptionCard";
 import {
   HOME_BALANCE,
-  HOME_SUBSCRIPTIONS,
   UPCOMING_SUBSCRIPTIONS,
 } from "@/constants/data";
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
+import { useSubscriptions } from "@/context/SubscriptionsContext";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-expo";
 import dayjs from "dayjs";
 import { styled } from "nativewind";
 import { useState } from "react";
-import { FlatList, Image, Text, View } from "react-native";
+import { FlatList, Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const ContentView = styled(View);
@@ -21,9 +22,11 @@ const ContentView = styled(View);
 export default function App() {
   const { user } = useUser();
   const displayName = user?.firstName ?? user?.fullName ?? "there";
-  const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<
-    string | null
-  >(null);
+
+  const { subscriptions, addSubscription } = useSubscriptions();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [expandedSubscriptionId, setExpandedSubscriptionId] = useState<string | null>(null);
+
   return (
     <SafeAreaView
       edges={["top", "bottom"]}
@@ -44,11 +47,13 @@ export default function App() {
                     {displayName}
                   </Text>
                 </View>
-                <Image
-                  source={icons.add}
-                  className="w-12"
-                  style={{ width: 40, height: 40 }}
-                />
+                <Pressable onPress={() => setModalVisible(true)} hitSlop={8}>
+                  <Image
+                    source={icons.add}
+                    className="w-12"
+                    style={{ width: 40, height: 40 }}
+                  />
+                </Pressable>
               </View>
               <View className="my-2.5 min-h-50 justify-between gap-5 rounded-bl-4xl rounded-tr-4xl bg-accent p-6">
                 <Text className="text-xl font-sans-semibold text-white/80">
@@ -83,7 +88,7 @@ export default function App() {
               <ListHeading title="All Subscriptions" />
             </>
           )}
-          data={HOME_SUBSCRIPTIONS}
+          data={subscriptions}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <SubscriptionCard
@@ -107,6 +112,12 @@ export default function App() {
           contentContainerClassName="pb-30"
         />
       </ContentView>
+
+      <CreateSubscriptionModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onAdd={addSubscription}
+      />
     </SafeAreaView>
   );
 }
