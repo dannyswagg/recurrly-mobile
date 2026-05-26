@@ -114,7 +114,9 @@ export default function Subscriptions() {
                   color: "rgba(0,0,0,0.4)",
                 }}
               >
-                No subscriptions match &quot;{query}&quot;
+                {query.trim()
+                  ? `No subscriptions match "${query.trim()}"`
+                  : "You have no subscriptions yet."}
               </Text>
             </View>
           }
