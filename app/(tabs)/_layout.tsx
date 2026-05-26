@@ -1,5 +1,6 @@
 import { tabs } from "@/constants/data";
 import { colors, components } from "@/constants/theme";
+import { SubscriptionsProvider } from "@/context/SubscriptionsContext";
 import { Tabs } from "expo-router";
 import { Image, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -30,6 +31,7 @@ const TabLayout = () => {
   };
 
   return (
+    <SubscriptionsProvider>
     <Tabs
       screenOptions={{
         headerShown: false,
@@ -67,6 +69,7 @@ const TabLayout = () => {
         />
       ))}
     </Tabs>
+    </SubscriptionsProvider>
   );
 };
 
