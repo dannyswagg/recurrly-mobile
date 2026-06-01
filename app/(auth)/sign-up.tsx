@@ -1,5 +1,6 @@
 import { useSignUp } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
+import { posthog } from "@/lib/posthog";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -210,6 +211,12 @@ export default function SignUp() {
       const result = await signUp!.attemptEmailAddressVerification({ code: trimmedCode });
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
+        const userEmail = email.trim().toLowerCase();
+        posthog.identify(userEmail, {
+          $set: { email: userEmail, name: name.trim() },
+          $set_once: { sign_up_date: new Date().toISOString() },
+        });
+        posthog.capture('user_signed_up', { method: 'email' });
         router.replace("/(tabs)");
       }
     } catch (err) {

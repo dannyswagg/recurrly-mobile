@@ -1,6 +1,7 @@
 import SubscriptionCard from "@/components/SubscriptionCard";
 import { useSubscriptions } from "@/context/SubscriptionsContext";
-import { useMemo, useState } from "react";
+import { posthog } from "@/lib/posthog";
+import { useMemo, useRef, useState } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -15,6 +16,7 @@ export default function Subscriptions() {
   const { subscriptions } = useSubscriptions();
   const [query, setQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -80,6 +82,12 @@ export default function Subscriptions() {
             onChangeText={(v) => {
               setQuery(v);
               setExpandedId(null);
+              if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+              if (v.trim()) {
+                searchDebounceRef.current = setTimeout(() => {
+                  posthog.capture('subscription_searched', { query: v.trim() });
+                }, 800);
+              }
             }}
             autoCorrect={false}
             autoCapitalize="none"

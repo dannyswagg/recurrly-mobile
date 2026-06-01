@@ -9,6 +9,7 @@ import {
 import { icons } from "@/constants/icons";
 import images from "@/constants/images";
 import { useSubscriptions } from "@/context/SubscriptionsContext";
+import { posthog } from "@/lib/posthog";
 import { formatCurrency } from "@/lib/utils";
 import { useUser } from "@clerk/clerk-expo";
 import dayjs from "dayjs";
@@ -94,11 +95,19 @@ export default function App() {
             <SubscriptionCard
               {...item}
               expanded={expandedSubscriptionId === item.id}
-              onPress={() =>
+              onPress={() => {
+                const isExpanding = expandedSubscriptionId !== item.id;
                 setExpandedSubscriptionId((currentId) =>
                   currentId === item.id ? null : item.id,
-                )
-              }
+                );
+                if (isExpanding) {
+                  posthog.capture('subscription_viewed', {
+                    name: item.name,
+                    category: item.category ?? null,
+                    billing: item.billing,
+                  });
+                }
+              }}
             />
           )}
           extraData={expandedSubscriptionId}

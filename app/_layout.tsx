@@ -1,22 +1,30 @@
 import "@/global.css";
 import { tokenCache } from "@/lib/tokenCache";
+import { posthog } from "@/lib/posthog";
 import { ClerkProvider, useAuth } from "@clerk/clerk-expo";
 import { useFonts } from "expo-font";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, usePathname, useGlobalSearchParams, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+import { useEffect, useRef } from "react";
+import { PostHogProvider } from "posthog-react-native";
 
 SplashScreen.preventAutoHideAsync();
 
 const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 if (!publishableKey) {
-  throw new Error("Missing environment variable: EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY");
+  throw new Error(
+    "Missing environment variable: EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY",
+  );
 }
 
 function InitialLayout({ fontsLoaded }: { fontsLoaded: boolean }) {
   const { isSignedIn, isLoaded } = useAuth();
   const segments = useSegments();
   const router = useRouter();
+  const pathname = usePathname();
+  const params = useGlobalSearchParams();
+  const previousPathname = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (fontsLoaded && isLoaded) {
@@ -33,6 +41,16 @@ function InitialLayout({ fontsLoaded }: { fontsLoaded: boolean }) {
       router.replace("/(auth)/sign-in");
     }
   }, [isSignedIn, isLoaded, segments]);
+
+  useEffect(() => {
+    if (previousPathname.current !== pathname) {
+      posthog.screen(pathname, {
+        previous_screen: previousPathname.current ?? null,
+        ...params,
+      });
+      previousPathname.current = pathname;
+    }
+  }, [pathname, params]);
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }
@@ -51,7 +69,16 @@ export default function RootLayout() {
 
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      <InitialLayout fontsLoaded={fontsLoaded} />
+      <PostHogProvider
+        client={posthog}
+        autocapture={{
+          captureScreens: false,
+          captureTouches: true,
+        }}
+      >
+        <StatusBar style="dark" backgroundColor="#fff9e3" />
+        <InitialLayout fontsLoaded={fontsLoaded} />
+      </PostHogProvider>
     </ClerkProvider>
   );
 }

@@ -1,5 +1,6 @@
 import { useSignIn } from "@clerk/clerk-expo";
 import { Link, useRouter } from "expo-router";
+import { posthog } from "@/lib/posthog";
 import React, { useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -69,6 +70,10 @@ export default function SignIn() {
       });
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
+        posthog.identify(email.trim().toLowerCase(), {
+          $set: { email: email.trim().toLowerCase() },
+        });
+        posthog.capture('user_signed_in', { method: 'email' });
         router.replace("/(tabs)");
       }
     } catch (err) {
