@@ -1,4 +1,5 @@
 import { icons } from "@/constants/icons";
+import { posthog } from "@/lib/posthog";
 import dayjs from "dayjs";
 import React, { useState } from "react";
 import {
@@ -99,7 +100,7 @@ export default function CreateSubscriptionModal({
 
     const subscription: Subscription = {
       id: `custom-${Date.now()}`,
-      icon: icons.wallet,
+      icon: icons.plus,
       name: name.trim(),
       price: parseFloat(price),
       currency: "USD",
@@ -111,6 +112,12 @@ export default function CreateSubscriptionModal({
       color: CATEGORY_COLORS[selectedCategory],
     };
 
+    posthog.capture('subscription_created', {
+      name: subscription.name,
+      price: subscription.price,
+      billing: subscription.billing,
+      category: subscription.category ?? null,
+    });
     onAdd(subscription);
     reset();
     onClose();

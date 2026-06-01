@@ -1,5 +1,6 @@
 import { useClerk, useUser } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
+import { posthog } from "@/lib/posthog";
 import { styled } from "nativewind";
 import React from "react";
 import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
@@ -20,6 +21,8 @@ export default function Settings() {
   async function handleSignOut() {
     setLoading(true);
     try {
+      posthog.capture('user_signed_out');
+      posthog.reset();
       await signOut();
       router.replace("/(auth)/sign-in");
     } finally {
